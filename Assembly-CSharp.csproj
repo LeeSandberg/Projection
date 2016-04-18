@@ -125,6 +125,7 @@
      <Compile Include="Assets\LeapMotion\Scripts\VR\LeapVRTemporalWarping.cs" />
      <Compile Include="Assets\LeapMotion\Scripts\VR\TemporalWarpingStatus.cs" />
      <Compile Include="Assets\Scripts\ClickFloor.cs" />
+     <Compile Include="Assets\Scripts\ClickWallOneRobot.cs" />
      <Compile Include="Assets\Scripts\CustomerAgent.cs" />
      <Compile Include="Assets\Scripts\DepthCamera.cs" />
      <Compile Include="Assets\Scripts\GallarytFloor.cs" />

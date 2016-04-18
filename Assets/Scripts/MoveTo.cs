@@ -4,7 +4,7 @@ using System.Collections;
 public class MoveTo : MonoBehaviour {
 
     private NavMeshAgent agent = null;
-    public float smoothing = 7f;
+    //public float smoothing = 7f;
 
     public Vector3 Target
     {

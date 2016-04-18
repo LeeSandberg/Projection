@@ -23,18 +23,18 @@ public class OneRobotClickFloor : MonoBehaviour {
         }
 
     }
-
-    void Update()
-    {
-
+		
+	void Update()
+	{
 		RaycastHit hit;
-        if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out hit))
-                sn1.Target = hit.point;
-                //agent.SetDestination(hit.point);
+		if (Input.GetMouseButtonDown(0))
+		{
+			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			if (Physics.Raycast(ray, out hit)){
+			sn1.Target = hit.point;
+			//agent.SetDestination(hit.point);
+			}
 
-        }
-    }
+		}
+	}
 }
