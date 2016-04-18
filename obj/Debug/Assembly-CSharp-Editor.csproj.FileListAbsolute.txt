@@ -33,3 +33,5 @@ C:\Users\jitin\Documents\GitHub\Projection\Temp\bin\Debug\UnityEditor.TreeEditor
 C:\Users\jitin\Documents\GitHub\Projection\obj\Debug\Assembly-CSharp-Editor.csprojResolveAssemblyReference.cache
 C:\Users\jitin\Documents\GitHub\Projection\obj\Debug\Assembly-CSharp-Editor.dll
 C:\Users\jitin\Documents\GitHub\Projection\obj\Debug\Assembly-CSharp-Editor.pdb
+C:\Users\jitin\Documents\GitHub\Projection\Temp\bin\Debug\Assembly-CSharp-firstpass.pdb
+C:\Users\jitin\Documents\GitHub\Projection\Temp\bin\Debug\Assembly-CSharp.pdb

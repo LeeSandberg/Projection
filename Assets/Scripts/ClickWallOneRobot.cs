@@ -7,6 +7,8 @@ public class ClickWallOneRobot : MonoBehaviour
 
     private GameObject go1 = null;
     private MoveTo sn1 = null;
+    private Vector3 modifier;
+    public float clearance = 2f;
 
     void Awake()
     {
@@ -27,6 +29,7 @@ public class ClickWallOneRobot : MonoBehaviour
 
     void Update()
     {
+
         RaycastHit hit;
         if (Input.GetMouseButtonDown(0))
         {
@@ -35,7 +38,11 @@ public class ClickWallOneRobot : MonoBehaviour
             int layerMask = 1 << 8;                                         //this is bit shifting in order to mask or use particular layers only - used for the raycast below (walls declared as 8th layer)
             if (Physics.Raycast(ray, out hit, 100f, layerMask))             //ray as input(or origin,direction can be used, hit for output, 100 is reach of ray, layerMask indicates which layer the ray is used in (walls here)
             {
-                sn1.Target = hit.point;
+                modifier.x = hit.point.x - clearance;                              // the algorithm for calculating optimum robot position from projection location should be input as a function here to replace these 3 lines.
+                modifier.y = hit.point.y - clearance;
+                modifier.z = hit.point.z - clearance;
+
+                sn1.Target = modifier;                               
             }
 
         }
