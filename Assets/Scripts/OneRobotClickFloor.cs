@@ -30,9 +30,9 @@ public class OneRobotClickFloor : MonoBehaviour {
 		if (Input.GetMouseButtonDown(0))
 		{
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			if (Physics.Raycast(ray, out hit)){
+            Debug.DrawRay(ray.origin, ray.direction, Color.green, 15f);
+            if (Physics.Raycast(ray, out hit)){
 			sn1.Target = hit.point;
-			//agent.SetDestination(hit.point);
 			}
 
 		}
