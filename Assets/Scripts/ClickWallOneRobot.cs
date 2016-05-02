@@ -10,33 +10,6 @@ public class ClickWallOneRobot : MonoBehaviour
     private Vector3 modifier;
     public float clearance = 2f;
 
-/*	QuadTree quadTree;
-	public int maxNodeDepth = 5;
-	public int maxNodeObjects = 0;
-	public int itemsPerAdd = 1;
-	GameObject itemParent;
-
-	void Start () {
-		Generate();
-	}
-
-	void Generate() {
-		quadTree = new QuadTree(100, maxNodeDepth, maxNodeObjects, new Vector2(this.transform.position.x, this.transform.position.y));
-		itemParent = new GameObject("ObjectsInQuadTree");
-	}
-
-	void AddItem() {
-		AddItem(new Vector3(Random.Range(-50f, 50f), Random.Range(-50f, 50f), 0));
-	}
-
-	void AddItem(Vector3 position) {
-		GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-		go.transform.parent = itemParent.transform;
-		go.transform.position = position;
-		quadTree.Add(go);
-	}
-
-*/
     void Awake()
     {
 
@@ -74,11 +47,4 @@ public class ClickWallOneRobot : MonoBehaviour
 
         }
     }
-
-/*	void OnDrawGizmos() {
-		if(quadTree != null) {
-			quadTree.Draw();
-		}
-	}
-*/
 }

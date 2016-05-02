@@ -45,6 +45,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\EmptyClass.cs" />
      <Compile Include="Assets\LeapC\Arm.cs" />
      <Compile Include="Assets\LeapC\Bone.cs" />
      <Compile Include="Assets\LeapC\CSharpExtensions.cs" />
@@ -135,7 +136,9 @@
      <Compile Include="Assets\Scripts\NavmeshAgents.cs" />
      <Compile Include="Assets\Scripts\OneRobotClickFloor.cs" />
      <Compile Include="Assets\Scripts\QuadTree.cs" />
+     <Compile Include="Assets\Scripts\QuadTree3d.cs" />
      <Compile Include="Assets\Scripts\QuadTreeInterface.cs" />
+     <Compile Include="Assets\Scripts\QuadTreeInterface3d.cs" />
      <Compile Include="Assets\Scripts\Rotator.cs" />
      <Compile Include="Assets\Scripts\SmartNavmeshAgent.cs" />
      <None Include="Assets\Standard Assets\Effects\GlassRefraction\Shaders\GlassStainedBumpDistort.shader" />
