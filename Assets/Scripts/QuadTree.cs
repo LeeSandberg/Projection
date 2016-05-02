@@ -41,7 +41,7 @@ public class QuadTree {
 			this.nodeBounds = new Rect(center.x - (size/2), center.y - (size/2), size, size);
 		}
 	}
-	
+
 	public bool Add(GameObject go)
 	{
 		if (this.nodeBounds.Contains(go.transform.position))
@@ -198,8 +198,11 @@ public class QuadTree {
 
 
 	public void Draw() {
-		Gizmos.DrawWireCube(nodeCenter, new Vector3(nodeSize, nodeSize, 5));
 		
+
+
+		Gizmos.DrawWireCube(nodeCenter, new Vector3(nodeSize, nodeSize, 0));
+
 		if(searched) {
 			Gizmos.color = Color.red;
 			Gizmos.DrawWireSphere(nodeCenter, (nodeSize/2));
@@ -213,3 +216,4 @@ public class QuadTree {
 		}
 	}
 }
+
