@@ -7,6 +7,7 @@ public class QuadTree3d {
 	static int childCount = 4;
 	static int maxObjectCount = 100;
 	static int maxDepth;
+	static int baseNodeCost = 1000;
 
 	//Used for visual debugging/demonstation
 	private bool searched = false;
@@ -17,6 +18,7 @@ public class QuadTree3d {
 	private List<GameObject> objects = new List<GameObject>();
 
 	private int currentDepth = 0;
+	private int nodeCost;
 
 	private Vector3 nodeCenter;															//
 	private Rect nodeBounds = new Rect();
@@ -40,6 +42,7 @@ public class QuadTree3d {
 		} else {
 			this.nodeBounds = new Rect(center.x - (size/2), center.z - (size/2), size, size);
 		}
+		this.nodeCost = baseNodeCost  * 10^this.currentDepth;
 	}
 
 	public bool Add(GameObject go)
@@ -70,21 +73,51 @@ public class QuadTree3d {
 			return this.childNodes[index].Add(obj, objCenter);
 		}
 		//We've reached a root
-		if(this.currentDepth < maxDepth && this.objects.Count + 1 > maxObjectCount) {
+
+
+/*		if (this.currentDepth < maxDepth && this.objects.Count + 1 > maxObjectCount) {
 			//If adding this object puts this node past its limit, and we're not at the 
 			// maximum depth, split this node and redistribute its objects to its children
-			Split(nodeSize);
-			foreach(GameObject nodeObject in objects){
-				Add(nodeObject);
+			Split (nodeSize);
+			//Insert nodeCost here instead??????
+			foreach (GameObject nodeObject in objects) {
+				Add (nodeObject);
 			}
-			this.objects.Clear();
+			this.objects.Clear ();
 
 			//And don't forget to add the object that caused us to split!
 			return Add (obj, objCenter);
-		} else {
+		} 
+		else {
 			//Otherwise, just add this object to this node pool
 			this.objects.Add(obj);
 		}
+
+*/
+
+		if (this.objects.Count + 1 > maxObjectCount) {
+			//If adding this object puts this node past its limit, and we're not at the 
+			// maximum depth, split this node and redistribute its objects to its children
+			if (this.currentDepth < maxDepth) {
+				Split (nodeSize);
+				foreach (GameObject nodeObject in objects) {
+					Add (nodeObject);
+				}
+				this.objects.Clear ();
+
+				//And don't forget to add the object that caused us to split!
+				return Add (obj, objCenter);
+			} else {
+				this.nodeCost = this.nodeCost * 100;
+			}
+		}
+		else {
+			//Otherwise, just add this object to this node pool
+			this.objects.Add(obj);
+		}
+
+
+
 		return this;
 	}
 
@@ -116,7 +149,10 @@ public class QuadTree3d {
 		this.childNodes[3] = new QuadTree3d(parentSize/2, depth, this.nodeCenter + new Vector3(quarter, 0, quarter), this);
 	}
 
-	public GameObject FindNearest(Vector3 position) {
+
+
+
+	/*	public GameObject FindNearest(Vector3 position) {
 		return FindNearest(position.x, position.y, position.z);
 	}
 
@@ -163,7 +199,7 @@ public class QuadTree3d {
 		}
 		return closest;
 	}
-
+*/
 	private QuadTree3d GetNodeContaining(float x, float y) {
 		if (this.childNodes != null)
 		{
@@ -203,11 +239,12 @@ public class QuadTree3d {
 
 		Gizmos.DrawWireCube(nodeCenter, new Vector3(nodeSize, 0, nodeSize));
 
-		if(searched) {
+/*		if(searched) {
 			Gizmos.color = Color.red;
 			Gizmos.DrawWireSphere(nodeCenter, (nodeSize/2));
 			Gizmos.color = Color.white;
 		}
+		*/
 
 		if(childNodes != null) {
 			foreach(QuadTree3d child in childNodes) {

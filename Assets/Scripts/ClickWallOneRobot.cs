@@ -3,12 +3,15 @@ using System.Collections;
 
 public class ClickWallOneRobot : MonoBehaviour
 {
-
-
+	public int angle = 0;
+	//public int angleSpeed = 5;
+	public int maxHorizontalKeystone = 40;
+	public int maxVerticalKeystone = 40;
+	public float Dopt = 2;
+	public float robotHeight = 1;
     private GameObject go1 = null;
     private MoveTo sn1 = null;
-    private Vector3 modifier;
-    public float clearance = 2f;
+    private Vector3 projectionLocation;
 
     void Awake()
     {
@@ -29,20 +32,28 @@ public class ClickWallOneRobot : MonoBehaviour
 
     void Update()
     {
-
+		
         RaycastHit hit;
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);    //generates a ray using input from mouse for direction (i believe the local origin(camera view) is used for origin)
-            Debug.DrawRay(ray.origin, ray.direction, Color.green, 15f);     //in order to see the ray casted for debugging
+            Debug.DrawRay(ray.origin, ray.direction, Color.green, 5f);     //in order to see the ray casted for debugging
             int layerMask = 1 << 8;                                         //this is bit shifting in order to mask or use particular layers only - used for the raycast below (walls declared as 8th layer)
             if (Physics.Raycast(ray, out hit, 100f, layerMask))             //ray as input(or origin,direction can be used, hit for output, 100 is reach of ray, layerMask indicates which layer the ray is used in (walls here)
             {
-                modifier.x = hit.point.x - clearance;                              // the algorithm for calculating optimum robot position from projection location should be input as a function here to replace these 3 lines.
-                modifier.y = hit.point.y - clearance;
-                modifier.z = hit.point.z - clearance;
+					
 
-                sn1.Target = modifier;                               
+				projectionLocation = hit.point;
+				Vector3 projectionDirection = Quaternion.AngleAxis (angle, transform.up)*hit.normal;
+				Ray perpendicular = new Ray (hit.point, projectionDirection);
+				Debug.DrawRay(projectionLocation, projectionDirection, Color.blue,5f);
+
+				float D = Mathf.Sqrt((Dopt*Dopt) - Mathf.Pow((projectionLocation.y-robotHeight),2));
+				projectionLocation = perpendicular.GetPoint (D);
+
+				//complete algorithm here
+
+				sn1.Target = projectionLocation;                               
             }
 
         }
