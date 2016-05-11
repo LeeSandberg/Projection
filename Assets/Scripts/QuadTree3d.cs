@@ -7,7 +7,7 @@ public class QuadTree3d {
 	static int childCount = 4;
 	static int maxObjectCount = 100;
 	static int maxDepth;
-	static int baseNodeCost = 1000;
+	static float baseNodeCost = 1000;
 
 	//Used for visual debugging/demonstation
 	private bool searched = false;
@@ -17,8 +17,8 @@ public class QuadTree3d {
 
 	private List<GameObject> objects = new List<GameObject>();
 
-	private int currentDepth = 0;
-	private int nodeCost;
+	public int currentDepth = 0;
+	public float nodeCost;
 
 	private Vector3 nodeCenter;															//
 	private Rect nodeBounds = new Rect();
@@ -42,7 +42,7 @@ public class QuadTree3d {
 		} else {
 			this.nodeBounds = new Rect(center.x - (size/2), center.z - (size/2), size, size);
 		}
-		this.nodeCost = baseNodeCost  * 10^this.currentDepth;
+		this.nodeCost = baseNodeCost  * Mathf.Pow(10,this.currentDepth);
 	}
 
 	public bool Add(GameObject go)
@@ -200,18 +200,37 @@ public class QuadTree3d {
 		return closest;
 	}
 */
-	private QuadTree3d GetNodeContaining(float x, float y) {
+/*	private QuadTree3d GetNodeContaining(float x, float y) {
 		if (this.childNodes != null)
 		{
 			// Find the index of the child that contains the center of the object
 			int index = (x < this.nodeCenter.x ? 0 : 1) 
-				+ (y < this.nodeCenter.y ? 0 : 2);
+				+ (y < this.nodeCenter.z ? 0 : 2);
 
 			return this.childNodes[index].GetNodeContaining(x, y);
 		} else {
 			return this;
 		}
 	}
+*/
+
+
+
+	public QuadTree3d GetNodeContaining(float x, float z) {
+		if (this.childNodes != null)
+		{
+			// Find the index of the child that contains the center of the object
+			int index = (x < this.nodeCenter.x ? 0 : 1) 
+				+ (z < this.nodeCenter.z ? 0 : 2);
+
+			return this.childNodes[index].GetNodeContaining(x, z);
+		} else {
+			return this;
+		}
+	}
+
+
+
 
 	public void ClearSearch() {
 		searched = false;

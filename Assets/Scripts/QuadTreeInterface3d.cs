@@ -8,15 +8,49 @@ public class QuadTreeInterface3d : MonoBehaviour {
 	public int maxNodeObjects = 0;
 	public int itemsPerAdd = 1;
 	GameObject itemParent;
+	public int angle = 0;
+	//public int angleSpeed = 5;
+	public int maxHorizontalKeystone = 20;
+	public int maxVerticalKeystone = 30;
+	public float Dopt = 2;
+	public float Dmax = 8;
+	public float Dmin = 1;
+	public float robotHeight = 1;
+	public int baseNodeCost = 1000;
+	private GameObject go1 = null;
+	private MoveTo sn1 = null;
+	private Vector3 projectionLocation;
+	private float[,] envCostMatrix = new float[1000,3];
+	float leastCost = 10000000000000000000;
+	Vector3 leastCostIndex;
+	private Vector3 destination;
 	// Use this for initialization
-	private GameObject ground;
-	private int groundSize;
-	private Vector3 groundCenter;
+	//private GameObject ground;
+	//private int groundSize;
+	//private Vector3 groundCenter;
 
 	void Start () {
 //		Fetch();
 		Generate();
 	}
+
+	void Awake()
+	{
+
+		go1 = GameObject.Find("Robot01");
+
+		if (go1 != null)
+		{
+			sn1 = go1.GetComponent<MoveTo>();
+		}
+		else
+		{
+			Debug.Log("find couldn't find anything!!!!");
+
+		}
+
+	}
+
 
 /*	void Fetch(){
 		
@@ -70,8 +104,82 @@ public class QuadTreeInterface3d : MonoBehaviour {
 				temp.y = temp.y + .25f;
 				AddItem(temp);
 			}
+		}
+		else if (Input.GetMouseButtonDown(0))
+		{
+			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);    //generates a ray using input from mouse for direction (i believe the local origin(camera view) is used for origin)
+			Debug.DrawRay(ray.origin, ray.direction, Color.green, 5f);     //in order to see the ray casted for debugging
+			int layerMask = 1 << 8;                                         //this is bit shifting in order to mask or use particular layers only - used for the raycast below (walls declared as 8th layer)
+			if (Physics.Raycast(ray, out hit, 100f, layerMask))             //ray as input(or origin,direction can be used, hit for output, 100 is reach of ray, layerMask indicates which layer the ray is used in (walls here)
+			{
+				int i = 0;
+				projectionLocation = hit.point;
+				Vector3 projectionDirection = Quaternion.AngleAxis (angle, transform.up)*hit.normal;
+				Ray perpendicular = new Ray (hit.point, projectionDirection);
+				Debug.DrawRay(projectionLocation, projectionDirection, Color.blue,5f);
 
-		
+				float D = Mathf.Sqrt((Dopt*Dopt) - Mathf.Pow((projectionLocation.y-robotHeight),2));		//to account for height of projection.
+				Debug.Log ("Value for D is " + D);
+				Vector3 projectorLocation = perpendicular.GetPoint (D);
+				float x = projectorLocation.x;
+				float z = projectorLocation.z;
+				QuadTree3d node  = quadTree.GetNodeContaining(x,z);
+				float envCost = node.nodeCost;
+				int depth = node.currentDepth;
+				Debug.Log ("depth of the node is " + depth);
+				Debug.Log ("cost of the node is " + envCost);
+				sn1.Target = projectorLocation;
+
+
+
+				//float dist = Mathf.Sqrt((Dopt*Dopt) - Mathf.Pow((projectionLocation.y-robotHeight),2));		//to account for height of projection.
+/*				for (float D = Dmin; D < Dmax; D = D + .5f) {
+					float effectiveD = Mathf.Sqrt ((D * D) - Mathf.Pow ((projectionLocation.y - robotHeight), 2));
+					Debug.Log ("Value for D is " + D);
+					Vector3 projectorLocation = perpendicular.GetPoint (effectiveD);
+					//Debug.Log ("Value for effectiveD is " + effectiveD);
+
+					float x = projectorLocation.x;
+					float z = projectorLocation.z;
+					QuadTree3d node  = quadTree.GetNodeContaining(x,z);
+					float envCost = node.nodeCost;
+					int depth = node.currentDepth;
+					Debug.Log ("depth of the node is " + depth);
+					Debug.Log ("cost of the node is " + envCost);
+
+					envCostMatrix [i, 0] = x;
+					envCostMatrix [i, 1] = z;
+					envCostMatrix [i, 2] = envCost;
+
+					leastCost = (envCost < leastCost ? envCost : leastCost);
+					Debug.Log ("least cost is " + leastCost);
+					if (envCost < leastCost) {
+						leastCost = envCost;
+						leastCostIndex.x = projectorLocation.x;
+						leastCostIndex.y = 0.5f;
+						leastCostIndex.z = projectorLocation.z;
+					} 
+
+					//leastCostIndex = (envCost < leastCost ? projectorLocation : leastCostIndex);
+					//Debug.Log ("index value is " + i);
+					//Debug.Log ("least cost index is" + leastCostIndex);
+
+//complete algorithm here
+					//i = i + 1;
+				}
+
+
+
+				destination = leastCostIndex;
+				//destination.x = envCostMatrix[leastCostIndex,0];
+				//destination.y = 0.5f;
+				//destination.z = envCostMatrix [leastCostIndex, 1];
+				Debug.Log ("Destination is " + destination);
+					
+				sn1.Target = leastCostIndex;                               
+*/
+			}
+
 		}
 
 /*		if(Input.GetMouseButtonDown((int)MouseUtils.Button.Left)) {						//have to input transformations here

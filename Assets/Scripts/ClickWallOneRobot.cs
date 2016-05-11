@@ -48,12 +48,13 @@ public class ClickWallOneRobot : MonoBehaviour
 				Ray perpendicular = new Ray (hit.point, projectionDirection);
 				Debug.DrawRay(projectionLocation, projectionDirection, Color.blue,5f);
 
-				float D = Mathf.Sqrt((Dopt*Dopt) - Mathf.Pow((projectionLocation.y-robotHeight),2));
-				projectionLocation = perpendicular.GetPoint (D);
+				float D = Mathf.Sqrt((Dopt*Dopt) - Mathf.Pow((projectionLocation.y-robotHeight),2));		//to account for height of projection.
+				Vector3 projectorLocation = perpendicular.GetPoint (D);
 
 				//complete algorithm here
 
-				sn1.Target = projectionLocation;                               
+
+				sn1.Target = projectorLocation;                               
             }
 
         }
