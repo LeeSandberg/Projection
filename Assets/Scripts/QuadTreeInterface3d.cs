@@ -9,28 +9,26 @@ public class QuadTreeInterface3d : MonoBehaviour {
 	public int itemsPerAdd = 1;
 	GameObject itemParent;
 	public int angle = 0;
-	//public int angleSpeed = 5;
+
+	public int angleRes = 5;
+	public float DRes = .5f;
 	public int maxHorizontalKeystone = 20;
 	public int maxVerticalKeystone = 30;
 	public float Dopt = 2;
-	public float Dmax = 8;
+	public float Dmax = 5;
 	public float Dmin = 1;
 	public float robotHeight = 1;
-	public int baseNodeCost = 1000;
+	public int baseNodeCost = 10;
 	private GameObject go1 = null;
 	private MoveTo sn1 = null;
 	private Vector3 projectionLocation;
 	private float[,] envCostMatrix = new float[1000,3];
 	float leastCost = 10000000000000000000;
-	Vector3 leastCostIndex;
+	private Vector3 leastCostIndex;
 	private Vector3 destination;
 	// Use this for initialization
-	//private GameObject ground;
-	//private int groundSize;
-	//private Vector3 groundCenter;
 
 	void Start () {
-//		Fetch();
 		Generate();
 	}
 
@@ -51,20 +49,6 @@ public class QuadTreeInterface3d : MonoBehaviour {
 
 	}
 
-
-/*	void Fetch(){
-		
-		ground = GameObject.Find ("plane001");
-		float xSize = ground.GetComponent<Renderer>().bounds.size.x;
-		Debug.Log ("xSize is " + xSize);
-		float zSize = ground.GetComponent<Renderer>().bounds.size.z;
-		Debug.Log ("zSize is " + zSize);
-		groundCenter = gameObject.GetComponent<Renderer>().bounds.center;
-		Debug.Log ("groundCenter is " + groundCenter);
-		groundSize = Mathf.CeilToInt (xSize);// > zSize ? xSize : zSize);
-		Debug.Log ("groundSize is " + groundSize);
-	}
-*/
 	void Generate() {
 		quadTree = new QuadTree3d(10, maxNodeDepth, maxNodeObjects, new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z));	//(groundSize, maxNodeDepth, maxNodeObjects, groundCenter/*new Vector2(this.transform.position.x, this.transform.position.y)*/);
 		itemParent = new GameObject("ObjectsInQuadTree");
@@ -114,11 +98,51 @@ public class QuadTreeInterface3d : MonoBehaviour {
 			{
 				int i = 0;
 				projectionLocation = hit.point;
-				Vector3 projectionDirection = Quaternion.AngleAxis (angle, transform.up)*hit.normal;
-				Ray perpendicular = new Ray (hit.point, projectionDirection);
-				Debug.DrawRay(projectionLocation, projectionDirection, Color.blue,5f);
 
-				float D = Mathf.Sqrt((Dopt*Dopt) - Mathf.Pow((projectionLocation.y-robotHeight),2));		//to account for height of projection.
+				for (angle = -maxHorizontalKeystone; angle < maxHorizontalKeystone; angle += angleRes) {
+				Debug.Log("ANGLE is " + angle);
+					Vector3 projectionDirection = Quaternion.AngleAxis (angle, transform.up) * hit.normal;
+					Ray perpendicular = new Ray (hit.point, projectionDirection);
+					Debug.DrawRay (projectionLocation, projectionDirection, Color.blue, 5f);
+
+					for (float D = Dmin; D <= Dmax; D = D + DRes) {
+						float effectiveD = Mathf.Sqrt ((D * D) - Mathf.Pow ((projectionLocation.y - robotHeight), 2));
+						Debug.Log ("Value for D is " + D);
+						Vector3 projectorLocation = perpendicular.GetPoint (effectiveD);
+						//Debug.Log ("Value for effectiveD is " + effectiveD);
+							
+						float x = projectorLocation.x;
+						float z = projectorLocation.z;
+						QuadTree3d node = quadTree.GetNodeContaining (x, z);
+						float envCost = node.nodeCost;
+						int depth = node.currentDepth;
+						Debug.Log ("depth of the node is " + depth);
+						Debug.Log ("cost of the node is " + envCost);
+
+						envCostMatrix [i, 0] = x;
+						envCostMatrix [i, 1] = z;
+						envCostMatrix [i, 2] = envCost;
+
+						if (envCost < leastCost) {
+							leastCost = envCost;
+							Debug.Log ("least cost is " + leastCost);
+							leastCostIndex.x = projectorLocation.x;
+							leastCostIndex.y = 0.5f;
+							leastCostIndex.z = projectorLocation.z;
+							Debug.Log ("LeastCost location is " + leastCostIndex);
+						} 
+						i = i + 1;
+
+
+					}
+					i = i + 1;
+				}
+
+
+
+					//complete algorithm here
+
+/*				float D = Mathf.Sqrt((Dopt*Dopt) - Mathf.Pow((projectionLocation.y-robotHeight),2));		//to account for height of projection.
 				Debug.Log ("Value for D is " + D);
 				Vector3 projectorLocation = perpendicular.GetPoint (D);
 				float x = projectorLocation.x;
@@ -129,56 +153,13 @@ public class QuadTreeInterface3d : MonoBehaviour {
 				Debug.Log ("depth of the node is " + depth);
 				Debug.Log ("cost of the node is " + envCost);
 				sn1.Target = projectorLocation;
-
-
-
-				//float dist = Mathf.Sqrt((Dopt*Dopt) - Mathf.Pow((projectionLocation.y-robotHeight),2));		//to account for height of projection.
-/*				for (float D = Dmin; D < Dmax; D = D + .5f) {
-					float effectiveD = Mathf.Sqrt ((D * D) - Mathf.Pow ((projectionLocation.y - robotHeight), 2));
-					Debug.Log ("Value for D is " + D);
-					Vector3 projectorLocation = perpendicular.GetPoint (effectiveD);
-					//Debug.Log ("Value for effectiveD is " + effectiveD);
-
-					float x = projectorLocation.x;
-					float z = projectorLocation.z;
-					QuadTree3d node  = quadTree.GetNodeContaining(x,z);
-					float envCost = node.nodeCost;
-					int depth = node.currentDepth;
-					Debug.Log ("depth of the node is " + depth);
-					Debug.Log ("cost of the node is " + envCost);
-
-					envCostMatrix [i, 0] = x;
-					envCostMatrix [i, 1] = z;
-					envCostMatrix [i, 2] = envCost;
-
-					leastCost = (envCost < leastCost ? envCost : leastCost);
-					Debug.Log ("least cost is " + leastCost);
-					if (envCost < leastCost) {
-						leastCost = envCost;
-						leastCostIndex.x = projectorLocation.x;
-						leastCostIndex.y = 0.5f;
-						leastCostIndex.z = projectorLocation.z;
-					} 
-
-					//leastCostIndex = (envCost < leastCost ? projectorLocation : leastCostIndex);
-					//Debug.Log ("index value is " + i);
-					//Debug.Log ("least cost index is" + leastCostIndex);
-
-//complete algorithm here
-					//i = i + 1;
-				}
-
-
-
-				destination = leastCostIndex;
-				//destination.x = envCostMatrix[leastCostIndex,0];
-				//destination.y = 0.5f;
-				//destination.z = envCostMatrix [leastCostIndex, 1];
-				Debug.Log ("Destination is " + destination);
-					
-				sn1.Target = leastCostIndex;                               
 */
-			}
+					destination = leastCostIndex;
+					Debug.Log ("DESTINATION is " + destination);
+					sn1.Target = leastCostIndex;
+					leastCost = 1000000000000000;
+
+				}
 
 		}
 
