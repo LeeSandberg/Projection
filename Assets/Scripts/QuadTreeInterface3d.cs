@@ -9,7 +9,7 @@ public class QuadTreeInterface3d : MonoBehaviour {
 	public int itemsPerAdd = 1;
 	GameObject itemParent;
 	public int angle = 0;
-
+	public float projectionAngle = 30f;
 	public int angleRes = 5;
 	public float DRes = .5f;
 	public int maxHorizontalKeystone = 20;
@@ -22,7 +22,7 @@ public class QuadTreeInterface3d : MonoBehaviour {
 	private GameObject go1 = null;
 	private MoveTo sn1 = null;
 	private Vector3 projectionLocation;
-	private float[,] envCostMatrix = new float[1000,3];
+	private float[,] envCostMatrix = new float[1000,6];
 	float leastCost = 10000000000000000000;
 	private Vector3 leastCostIndex;
 	private Vector3 destination;
@@ -63,8 +63,8 @@ public class QuadTreeInterface3d : MonoBehaviour {
 		go.transform.localScale = new Vector3(0.5f, .5f, .5f);
 		go.transform.parent = itemParent.transform;
 		go.transform.position = position;
-		go.AddComponent<NavMeshObstacle> ();
-		go.GetComponent<NavMeshObstacle> ().carving = true;
+		go.AddComponent<NavMeshObstacle> ();									//can edit area being carved out here
+		go.GetComponent<NavMeshObstacle> ().carving = true;						//used for carving out navmesh
 		quadTree.Add(go);
 	}
 
@@ -101,16 +101,18 @@ public class QuadTreeInterface3d : MonoBehaviour {
 
 				for (angle = -maxHorizontalKeystone; angle < maxHorizontalKeystone; angle += angleRes) {
 				Debug.Log("ANGLE is " + angle);
-					Vector3 projectionDirection = Quaternion.AngleAxis (angle, transform.up) * hit.normal;
-					Ray perpendicular = new Ray (hit.point, projectionDirection);
-					Debug.DrawRay (projectionLocation, projectionDirection, Color.blue, 5f);
+					Vector3 direction = Quaternion.AngleAxis (angle, transform.up) * hit.normal;
+					Ray perpendicular = new Ray (hit.point, direction);
+					Debug.DrawRay (projectionLocation, direction, Color.blue, 5f);
 
 					for (float D = Dmin; D <= Dmax; D = D + DRes) {
 						float effectiveD = Mathf.Sqrt ((D * D) - Mathf.Pow ((projectionLocation.y - robotHeight), 2));
 						Debug.Log ("Value for D is " + D);
 						Vector3 projectorLocation = perpendicular.GetPoint (effectiveD);
 						//Debug.Log ("Value for effectiveD is " + effectiveD);
-							
+
+
+						//Ray projectionLine = new Ray (projectorLocation, 
 						float x = projectorLocation.x;
 						float z = projectorLocation.z;
 						QuadTree3d node = quadTree.GetNodeContaining (x, z);
@@ -123,7 +125,42 @@ public class QuadTreeInterface3d : MonoBehaviour {
 						envCostMatrix [i, 1] = z;
 						envCostMatrix [i, 2] = envCost;
 
-						if (envCost < leastCost) {
+						//Add Dopt bonus as envCostMatrix[i,3] and modify envCostMatrix[i,5] to include bonus
+
+
+						Vector3 oppDirection = Quaternion.AngleAxis (180f, transform.up) * direction;
+						float projectionCost = 0f;
+						for (float theta = -projectionAngle / 2; theta < projectionAngle / 2; theta += 5f) {
+							Vector3 projectionDirection = Quaternion.AngleAxis (theta, transform.up) * oppDirection;
+							Ray projectionLine = new Ray (projectorLocation, projectionDirection);
+							Debug.DrawRay (projectorLocation, projectionDirection, Color.cyan, 0.5f);
+							for (float res = .5f; res < 0.8*effectiveD; res += 0.5f){
+								
+								Vector3 projectionCostPoint = projectionLine.GetPoint(res);
+								QuadTree3d check = quadTree.GetNodeContaining(projectionCostPoint.x, projectionCostPoint.z);
+								float costToAdd = check.nodeCost;
+								projectionCost += costToAdd;
+							}
+							Debug.Log ("for this angle, projectionCost is " + projectionCost);	
+						}
+						Debug.Log ("TOTAL PROJECTION COST IS " + projectionCost);
+
+						envCostMatrix [i, 4] = projectionCost;
+						envCostMatrix [i, 5] = envCostMatrix [i, 2] + envCostMatrix [i, 4];
+
+						if (envCostMatrix[i, 5] < leastCost) {
+							leastCost = envCostMatrix[i, 5];
+							Debug.Log ("least cost is " + leastCost);
+							leastCostIndex.x = envCostMatrix[i, 0];
+							leastCostIndex.y = 0.5f;
+							leastCostIndex.z = envCostMatrix[i, 1];
+							Debug.Log ("LeastCost location is " + leastCostIndex);
+						}
+
+
+
+							
+/*						if (envCost < leastCost) {
 							leastCost = envCost;
 							Debug.Log ("least cost is " + leastCost);
 							leastCostIndex.x = projectorLocation.x;
@@ -131,6 +168,7 @@ public class QuadTreeInterface3d : MonoBehaviour {
 							leastCostIndex.z = projectorLocation.z;
 							Debug.Log ("LeastCost location is " + leastCostIndex);
 						} 
+*/						
 						i = i + 1;
 
 
@@ -154,12 +192,13 @@ public class QuadTreeInterface3d : MonoBehaviour {
 				Debug.Log ("cost of the node is " + envCost);
 				sn1.Target = projectorLocation;
 */
-					destination = leastCostIndex;
-					Debug.Log ("DESTINATION is " + destination);
-					sn1.Target = leastCostIndex;
-					leastCost = 1000000000000000;
+				destination = leastCostIndex;
+				Debug.Log ("DESTINATION is " + destination);
+				Debug.DrawLine (projectionLocation, destination, Color.red, 5f);
+				sn1.Target = leastCostIndex;
+				leastCost = 1000000000000000;
 
-				}
+			}
 
 		}
 

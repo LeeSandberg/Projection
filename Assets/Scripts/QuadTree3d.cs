@@ -17,6 +17,8 @@ public class QuadTree3d {
 
 	private List<GameObject> objects = new List<GameObject>();
 
+	private List<QuadTree3d> leaves = new List<QuadTree3d> ();
+
 	public int currentDepth = 0;
 	public float nodeCost;
 
@@ -100,6 +102,7 @@ public class QuadTree3d {
 			// maximum depth, split this node and redistribute its objects to its children
 			if (this.currentDepth < maxDepth) {
 				Split (nodeSize);
+
 				foreach (GameObject nodeObject in objects) {
 					Add (nodeObject);
 				}
@@ -110,6 +113,9 @@ public class QuadTree3d {
 			} else {
 				this.nodeCost = this.nodeCost * 100;
 			}
+
+
+
 		}
 		else {
 			//Otherwise, just add this object to this node pool
@@ -139,6 +145,7 @@ public class QuadTree3d {
 
 	private void Split(float parentSize)
 	{
+		QuadTree3d parentNode = this.GetNodeContaining (nodeCenter.x, nodeCenter.z);
 		this.childNodes = new QuadTree3d[QuadTree3d.childCount];
 		int depth = this.currentDepth + 1;
 		float quarter = parentSize / 4f;
@@ -147,10 +154,33 @@ public class QuadTree3d {
 		this.childNodes[1] = new QuadTree3d(parentSize/2, depth, this.nodeCenter + new Vector3(quarter, 0, -quarter), this);
 		this.childNodes[2] = new QuadTree3d(parentSize/2, depth, this.nodeCenter + new Vector3(-quarter, 0, quarter), this);
 		this.childNodes[3] = new QuadTree3d(parentSize/2, depth, this.nodeCenter + new Vector3(quarter, 0, quarter), this);
+
+		if (leaves.Contains (parentNode)) {
+			leaves.Remove (parentNode);
+		}
+		leaves.Add(this.childNodes[0]);
+		leaves.Add(this.childNodes[1]);
+		leaves.Add(this.childNodes[2]);
+		leaves.Add(this.childNodes[3]);
+		Debug.Log ("LEAVES" + leaves.Count);
 	}
 
 
 
+/*	private void balanceSplit(QuadTree3d toSplit)
+	{
+		float parentSize = toSplit.nodeSize;
+		toSplit.childNodes = new QuadTree3d[QuadTree3d.childCount];
+		int depth = toSplit.currentDepth + 1;
+		float quarter = parentSize / 4f;
+
+		this.childNodes[0] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(-quarter, 0, -quarter), toSplit);
+		this.childNodes[1] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(quarter, 0, -quarter), toSplit);
+		this.childNodes[2] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(-quarter, 0, quarter), toSplit);
+		this.childNodes[3] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(quarter, 0, quarter), toSplit);
+	}
+
+*/
 
 	/*	public GameObject FindNearest(Vector3 position) {
 		return FindNearest(position.x, position.y, position.z);
@@ -273,3 +303,44 @@ public class QuadTree3d {
 	}
 }
 
+
+
+
+/*
+				QuadTree3d neighbour1 = GetNodeContaining ((nodeCenter.x - nodeSize), nodeCenter.z);
+				Debug.Log ("BALANCING");
+				//Debug.Log ("nodecenter" + nodeCenter);
+				//Debug.Log ("nodeSize" + nodeSize);
+				Debug.Log ("current depth " + this.currentDepth);
+				Debug.Log ("neighbor1 depth " + neighbour1.currentDepth);
+				if (this.currentDepth > (neighbour1.currentDepth+1)) {
+					balanceSplit (neighbour1);
+					Debug.Log ("neighbor1 successful");
+				}
+				QuadTree3d neighbour2 = GetNodeContaining ((nodeCenter.x + nodeSize), nodeCenter.z);
+				Debug.Log ("neighbor2 depth " + neighbour1.currentDepth);
+
+				Debug.DrawLine (neighbour1.nodeCenter, neighbour2.nodeCenter, Color.red, 5f);
+
+				if (this.currentDepth > (neighbour2.currentDepth+1)) {
+					balanceSplit (neighbour2);
+					Debug.Log ("neighbor2 successful");
+
+				}
+				QuadTree3d neighbour3 = GetNodeContaining (nodeCenter.x, (nodeCenter.z - nodeSize));
+				Debug.Log ("neighbor3 depth " + neighbour1.currentDepth);
+
+				if (this.currentDepth > (neighbour3.currentDepth+1)) {
+					balanceSplit (neighbour3);
+					Debug.Log ("neighbor3 successful");
+
+				}
+				QuadTree3d neighbour4 = GetNodeContaining (nodeCenter.x, (nodeCenter.z + nodeSize));
+				Debug.Log ("neighbor4 depth " + neighbour1.currentDepth);
+
+				if (this.currentDepth > (neighbour4.currentDepth+1)) {
+					balanceSplit (neighbour4);
+					Debug.Log ("neighbor4 successful");
+
+				}
+*/
