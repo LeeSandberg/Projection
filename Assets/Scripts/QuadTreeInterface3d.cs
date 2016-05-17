@@ -60,7 +60,7 @@ public class QuadTreeInterface3d : MonoBehaviour {
 
 	void AddItem(Vector3 position) {
 		GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-		go.transform.localScale = new Vector3(0.5f, .5f, .5f);
+		go.transform.localScale = new Vector3(.2f, .2f, .2f);
 		go.transform.parent = itemParent.transform;
 		go.transform.position = position;
 		go.AddComponent<NavMeshObstacle> ();									//can edit area being carved out here
@@ -130,19 +130,21 @@ public class QuadTreeInterface3d : MonoBehaviour {
 
 						Vector3 oppDirection = Quaternion.AngleAxis (180f, transform.up) * direction;
 						float projectionCost = 0f;
-						for (float theta = -projectionAngle / 2; theta < projectionAngle / 2; theta += 5f) {
+						float pointsAdded = 0f;
+						for (float theta = -projectionAngle / 2; theta < projectionAngle / 2; theta += angleRes) {
 							Vector3 projectionDirection = Quaternion.AngleAxis (theta, transform.up) * oppDirection;
 							Ray projectionLine = new Ray (projectorLocation, projectionDirection);
 							Debug.DrawRay (projectorLocation, projectionDirection, Color.cyan, 0.5f);
-							for (float res = .5f; res < 0.8*effectiveD; res += 0.5f){
+							for (float res = .5f; res < 0.8*effectiveD; res += DRes){
 								
 								Vector3 projectionCostPoint = projectionLine.GetPoint(res);
 								QuadTree3d check = quadTree.GetNodeContaining(projectionCostPoint.x, projectionCostPoint.z);
 								float costToAdd = check.nodeCost;
 								projectionCost += costToAdd;
+								pointsAdded++;
 							}
-							Debug.Log ("for this angle, projectionCost is " + projectionCost);	
 						}
+						projectionCost = projectionCost / pointsAdded;
 						Debug.Log ("TOTAL PROJECTION COST IS " + projectionCost);
 
 						envCostMatrix [i, 4] = projectionCost;

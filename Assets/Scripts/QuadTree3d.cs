@@ -17,7 +17,7 @@ public class QuadTree3d {
 
 	private List<GameObject> objects = new List<GameObject>();
 
-	private List<QuadTree3d> leaves = new List<QuadTree3d> ();
+	public static List<QuadTree3d> leaves = new List<QuadTree3d> ();			// For balancing - contains all leaves
 
 	public int currentDepth = 0;
 	public float nodeCost;
@@ -55,6 +55,8 @@ public class QuadTree3d {
 		}
 		return false;
 	}
+
+
 
 	private QuadTree3d Add(GameObject obj, Vector3 objCenter)													//
 	{
@@ -113,17 +115,12 @@ public class QuadTree3d {
 			} else {
 				this.nodeCost = this.nodeCost * 100;
 			}
-
-
-
 		}
 		else {
 			//Otherwise, just add this object to this node pool
 			this.objects.Add(obj);
+
 		}
-
-
-
 		return this;
 	}
 
@@ -143,9 +140,35 @@ public class QuadTree3d {
 		return false;
 	}
 
+
+
+
+
+
+	public bool AddLeaf(QuadTree3d leaf)
+	{
+		leaves.Add (leaf);
+		return true;
+
+	}
+
+	public bool RemoveLeaf(QuadTree3d leaf)
+	{
+		if (leaves.Contains (leaf)) {
+			leaves.Remove (leaf);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
+
+
+
 	private void Split(float parentSize)
 	{
-		QuadTree3d parentNode = this.GetNodeContaining (nodeCenter.x, nodeCenter.z);
+		QuadTree3d toRemove = this;
 		this.childNodes = new QuadTree3d[QuadTree3d.childCount];
 		int depth = this.currentDepth + 1;
 		float quarter = parentSize / 4f;
@@ -155,14 +178,21 @@ public class QuadTree3d {
 		this.childNodes[2] = new QuadTree3d(parentSize/2, depth, this.nodeCenter + new Vector3(-quarter, 0, quarter), this);
 		this.childNodes[3] = new QuadTree3d(parentSize/2, depth, this.nodeCenter + new Vector3(quarter, 0, quarter), this);
 
-		if (leaves.Contains (parentNode)) {
-			leaves.Remove (parentNode);
-		}
-		leaves.Add(this.childNodes[0]);
-		leaves.Add(this.childNodes[1]);
-		leaves.Add(this.childNodes[2]);
-		leaves.Add(this.childNodes[3]);
-		Debug.Log ("LEAVES" + leaves.Count);
+		RemoveLeaf (toRemove);
+
+		AddLeaf (this.childNodes[0]);
+		AddLeaf (this.childNodes[1]);
+		AddLeaf (this.childNodes[2]);
+		AddLeaf (this.childNodes[3]);
+
+		Debug.Log ("LEAF0 " + leaves[0].nodeCost);
+		Debug.Log ("LEAF1 " + leaves[1].nodeCenter);
+		Debug.Log ("LEAF2 " + leaves[2].nodeCenter);
+		Debug.Log ("LEAF3 " + leaves[3].nodeCenter);
+		Debug.Log("LEAVES " + leaves.Count);
+
+
+
 	}
 
 
