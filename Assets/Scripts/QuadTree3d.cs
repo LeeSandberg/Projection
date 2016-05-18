@@ -122,6 +122,9 @@ public class QuadTree3d {
 
 		}
 		return this;
+
+
+
 	}
 
 
@@ -166,6 +169,74 @@ public class QuadTree3d {
 
 
 
+
+	public QuadTree3d Balance(QuadTree3d quad){
+
+		while (leaves.Count>0){
+			QuadTree3d toBalance = leaves [0];
+	
+			QuadTree3d n1 = GetNodeContaining ((toBalance.nodeCenter.x - toBalance.nodeSize), toBalance.nodeCenter.z);
+			Debug.Log ("BALANCING");
+			//Debug.Log ("nodecenter" + nodeCenter);
+			//Debug.Log ("nodeSize" + nodeSize);
+			int neighbour1Depth = n1.currentDepth;
+			Debug.Log ("neighbor1 depth " + neighbour1Depth);
+			while (toBalance.currentDepth > (neighbour1Depth+1)) {
+				BalanceSplit (n1);
+				neighbour1Depth++;
+				Debug.Log ("neighbor1 successful");
+			}
+	
+			QuadTree3d n2 = GetNodeContaining ((toBalance.nodeCenter.x + toBalance.nodeSize), toBalance.nodeCenter.z);
+			Debug.Log ("BALANCING");
+			//Debug.Log ("nodecenter" + nodeCenter);
+			//Debug.Log ("nodeSize" + nodeSize);
+			int neighbour2Depth = n2.currentDepth;
+			Debug.Log ("neighbor2 depth " + neighbour2Depth);
+			while (toBalance.currentDepth > (neighbour2Depth+1)) {
+				BalanceSplit (n2);
+				neighbour2Depth++;
+				Debug.Log ("neighbor2 successful");
+			}
+	
+			QuadTree3d n3 = GetNodeContaining (toBalance.nodeCenter.x, (toBalance.nodeCenter.z - toBalance.nodeSize));
+			Debug.Log ("BALANCING");
+			//Debug.Log ("nodecenter" + nodeCenter);
+			//Debug.Log ("nodeSize" + nodeSize);
+			int neighbour3Depth = n3.currentDepth;
+			Debug.Log ("neighbor3 depth " + neighbour3Depth);
+			while (toBalance.currentDepth > (neighbour3Depth+1)) {
+				BalanceSplit (n3);
+				neighbour3Depth++;
+				Debug.Log ("neighbor3 successful");
+			}
+	
+			QuadTree3d n4 = GetNodeContaining (toBalance.nodeCenter.x, (toBalance.nodeCenter.z + toBalance.nodeSize));
+			Debug.Log ("BALANCING");
+			//Debug.Log ("nodecenter" + nodeCenter);
+			//Debug.Log ("nodeSize" + nodeSize);
+			int neighbour4Depth = n4.currentDepth;
+			Debug.Log ("neighbor4 depth " + neighbour4Depth);
+			while (toBalance.currentDepth > (neighbour4Depth+1)) {
+				BalanceSplit (n4);
+				neighbour4Depth++;
+				Debug.Log ("neighbor4 successful");
+			}
+	
+	
+			quad.RemoveLeaf(leaves[0]);
+			Debug.Log ("LEAVES " + leaves.Count);
+			//Debug.Log ("LEAF0 " + leaves[0].nodeCost);
+			//Debug.Log ("LEAF1 " + leaves[1].nodeCenter);
+	
+	
+		}
+		return quad;
+
+	}
+	
+	
+	
 	private void Split(float parentSize)
 	{
 		QuadTree3d toRemove = this;
@@ -197,20 +268,27 @@ public class QuadTree3d {
 
 
 
-/*	private void balanceSplit(QuadTree3d toSplit)
+	private void BalanceSplit(QuadTree3d toSplit)
 	{
 		float parentSize = toSplit.nodeSize;
 		toSplit.childNodes = new QuadTree3d[QuadTree3d.childCount];
 		int depth = toSplit.currentDepth + 1;
 		float quarter = parentSize / 4f;
 
-		this.childNodes[0] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(-quarter, 0, -quarter), toSplit);
-		this.childNodes[1] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(quarter, 0, -quarter), toSplit);
-		this.childNodes[2] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(-quarter, 0, quarter), toSplit);
-		this.childNodes[3] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(quarter, 0, quarter), toSplit);
+		toSplit.childNodes[0] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(-quarter, 0, -quarter), toSplit);
+		toSplit.childNodes[1] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(quarter, 0, -quarter), toSplit);
+		toSplit.childNodes[2] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(-quarter, 0, quarter), toSplit);
+		toSplit.childNodes[3] = new QuadTree3d(parentSize/2, depth, toSplit.nodeCenter + new Vector3(quarter, 0, quarter), toSplit);
+
+		RemoveLeaf (toSplit);
+
+		AddLeaf (toSplit.childNodes[0]);
+		AddLeaf (toSplit.childNodes[1]);
+		AddLeaf (toSplit.childNodes[2]);
+		AddLeaf (toSplit.childNodes[3]);
 	}
 
-*/
+
 
 	/*	public GameObject FindNearest(Vector3 position) {
 		return FindNearest(position.x, position.y, position.z);
@@ -277,20 +355,16 @@ public class QuadTree3d {
 
 
 	public QuadTree3d GetNodeContaining(float x, float z) {
-		if (this.childNodes != null)
-		{
+		if (this.childNodes != null) {
 			// Find the index of the child that contains the center of the object
-			int index = (x < this.nodeCenter.x ? 0 : 1) 
-				+ (z < this.nodeCenter.z ? 0 : 2);
+			int index = (x < this.nodeCenter.x ? 0 : 1)
+			            + (z < this.nodeCenter.z ? 0 : 2);
 
-			return this.childNodes[index].GetNodeContaining(x, z);
+			return this.childNodes [index].GetNodeContaining (x, z);
 		} else {
 			return this;
 		}
 	}
-
-
-
 
 	public void ClearSearch() {
 		searched = false;

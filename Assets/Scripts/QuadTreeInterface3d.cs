@@ -76,6 +76,8 @@ public class QuadTreeInterface3d : MonoBehaviour {
 			for(int item = 0; item < itemsPerAdd; item++) {
 				AddItem();
 			}
+			quadTree = quadTree.Balance (quadTree);
+
 		}
 		RaycastHit hit;
 		if(Input.GetKeyDown(KeyCode.M)) {
@@ -88,6 +90,8 @@ public class QuadTreeInterface3d : MonoBehaviour {
 				temp.y = temp.y + .25f;
 				AddItem(temp);
 			}
+			quadTree = quadTree.Balance (quadTree);
+
 		}
 		else if (Input.GetMouseButtonDown(0))
 		{
