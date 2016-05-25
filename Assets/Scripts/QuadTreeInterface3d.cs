@@ -4,10 +4,12 @@ using System.Collections;
 public class QuadTreeInterface3d : MonoBehaviour {
 
 	QuadTree3d quadTree;
+	GameObject itemParent;
+
+	// Public variables declaration
 	public int maxNodeDepth = 5;
 	public int maxNodeObjects = 0;
 	public int itemsPerAdd = 1;
-	GameObject itemParent;
 	public int angle = 0;
 	public float projectionAngle = 30f;
 	public int angleRes = 5;
@@ -19,44 +21,47 @@ public class QuadTreeInterface3d : MonoBehaviour {
 	public float Dmin = 1;
 	public float robotHeight = 1;
 	public int baseNodeCost = 10;
+	public int distanceBonusMultiplier = 2;
+	public int angleBonusDivider = 10;
+
+	// Private variables declaration
 	private GameObject go1 = null;
 	private MoveTo sn1 = null;
 	private Vector3 projectionLocation;
 	private float[,] envCostMatrix = new float[1000,6];
-	float leastCost = 10000000000000000000;
+	private float leastCost = 10000000000000000000;
 	private Vector3 leastCostIndex;
 	private Vector3 destination;
+
 	// Use this for initialization
 
 	void Start () {
 		Generate();
 	}
 
+
 	void Awake()
 	{
-
 		go1 = GameObject.Find("Robot01");
-
-		if (go1 != null)
-		{
+		if (go1 != null) {
 			sn1 = go1.GetComponent<MoveTo>();
 		}
-		else
-		{
+		else {
 			Debug.Log("find couldn't find anything!!!!");
-
 		}
-
 	}
+
 
 	void Generate() {
-		quadTree = new QuadTree3d(10, maxNodeDepth, maxNodeObjects, new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z));	//(groundSize, maxNodeDepth, maxNodeObjects, groundCenter/*new Vector2(this.transform.position.x, this.transform.position.y)*/);
+		quadTree = new QuadTree3d(50, maxNodeDepth, maxNodeObjects, new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z));	//(groundSize, maxNodeDepth, maxNodeObjects, groundCenter/*new Vector2(this.transform.position.x, this.transform.position.y)*/);
 		itemParent = new GameObject("ObjectsInQuadTree");
 	}
+
 
 	void AddItem() {
 		AddItem(new Vector3(Random.Range(-5f, 5f), .25f, Random.Range(-5f, 5f))); //Random.Range(-5f, 5f), Random.Range(-5f, 5f), 0
 	}
+
 
 	void AddItem(Vector3 position) {
 		GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -68,38 +73,33 @@ public class QuadTreeInterface3d : MonoBehaviour {
 		quadTree.Add(go);
 	}
 
+
 	// Update is called once per frame
 	void Update () {
-		
-
 		if(Input.GetKeyDown(KeyCode.O)) {
 			for(int item = 0; item < itemsPerAdd; item++) {
 				AddItem();
 			}
 			quadTree = quadTree.Balance (quadTree);
-
 		}
+
 		RaycastHit hit;
 		if(Input.GetKeyDown(KeyCode.M)) {
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);    //generates a ray using input from mouse for direction (i believe the local origin(camera view) is used for origin)
 			Debug.DrawRay(ray.origin, ray.direction, Color.green, 15f);     //in order to see the ray casted for debugging
 			int layerMask = 1 << 9;                                         //this is bit shifting in order to mask or use particular layers only - used for the raycast below (walls declared as 8th layer)
-			if (Physics.Raycast(ray, out hit, 100f, layerMask))             //ray as input(or origin,direction can be used, hit for output, 100 is reach of ray, layerMask indicates which layer the ray is used in (walls here)
-			{
+			if (Physics.Raycast(ray, out hit, 100f, layerMask)) {           //ray as input(or origin,direction can be used, hit for output, 100 is reach of ray, layerMask indicates which layer the ray is used in (walls here)
 				Vector3 temp = hit.point;
 				temp.y = temp.y + .25f;
 				AddItem(temp);
 			}
 			quadTree = quadTree.Balance (quadTree);
-
 		}
-		else if (Input.GetMouseButtonDown(0))
-		{
+		else if (Input.GetMouseButtonDown(0)) {
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);    //generates a ray using input from mouse for direction (i believe the local origin(camera view) is used for origin)
-			Debug.DrawRay(ray.origin, ray.direction, Color.green, 5f);     //in order to see the ray casted for debugging
+			Debug.DrawRay(ray.origin, ray.direction, Color.green, 5f);      //in order to see the ray casted for debugging
 			int layerMask = 1 << 8;                                         //this is bit shifting in order to mask or use particular layers only - used for the raycast below (walls declared as 8th layer)
-			if (Physics.Raycast(ray, out hit, 100f, layerMask))             //ray as input(or origin,direction can be used, hit for output, 100 is reach of ray, layerMask indicates which layer the ray is used in (walls here)
-			{
+			if (Physics.Raycast(ray, out hit, 100f, layerMask)) {           //ray as input(or origin,direction can be used, hit for output, 100 is reach of ray, layerMask indicates which layer the ray is used in (walls here)
 				int i = 0;
 				projectionLocation = hit.point;
 
@@ -109,12 +109,18 @@ public class QuadTreeInterface3d : MonoBehaviour {
 					Ray perpendicular = new Ray (hit.point, direction);
 					Debug.DrawRay (projectionLocation, direction, Color.blue, 5f);
 
+					float anglePower = Mathf.Abs (angle / angleBonusDivider);
+					float anglePowerMax = Mathf.Abs (maxHorizontalKeystone / angleBonusDivider);
+
+
+
+
+
 					for (float D = Dmin; D <= Dmax; D = D + DRes) {
 						float effectiveD = Mathf.Sqrt ((D * D) - Mathf.Pow ((projectionLocation.y - robotHeight), 2));
 						Debug.Log ("Value for D is " + D);
 						Vector3 projectorLocation = perpendicular.GetPoint (effectiveD);
 						//Debug.Log ("Value for effectiveD is " + effectiveD);
-
 
 						//Ray projectionLine = new Ray (projectorLocation, 
 						float x = projectorLocation.x;
@@ -130,6 +136,17 @@ public class QuadTreeInterface3d : MonoBehaviour {
 						envCostMatrix [i, 2] = envCost;
 
 						//Add Dopt bonus as envCostMatrix[i,3] and modify envCostMatrix[i,5] to include bonus
+						float distancePowerMax = Mathf.RoundToInt(Mathf.Abs(Dmax - Dmin))*distanceBonusMultiplier;
+						float distancePower = Mathf.RoundToInt(Mathf.Abs(Dopt - D))*distanceBonusMultiplier;
+
+						envCostMatrix [i, 3] = Mathf.Pow (10f, distancePowerMax - distancePower);
+						Debug.Log ("the distance bonus is " + envCostMatrix [i, 3]);
+
+						envCostMatrix [i, 3] *= Mathf.Pow (10f, anglePowerMax - anglePower);
+						Debug.Log ("the total bonus is " + envCostMatrix [i, 3]);
+
+
+
 
 
 						Vector3 oppDirection = Quaternion.AngleAxis (180f, transform.up) * direction;
@@ -149,10 +166,11 @@ public class QuadTreeInterface3d : MonoBehaviour {
 							}
 						}
 						projectionCost = projectionCost / pointsAdded;
-						Debug.Log ("TOTAL PROJECTION COST IS " + projectionCost);
+						Debug.Log ("Total projection angle cost is " + projectionCost);
 
 						envCostMatrix [i, 4] = projectionCost;
-						envCostMatrix [i, 5] = envCostMatrix [i, 2] + envCostMatrix [i, 4];
+						envCostMatrix [i, 5] = envCostMatrix [i, 2]/envCostMatrix[i, 3] + envCostMatrix [i, 4];
+						Debug.Log ("NET COST IS " + envCostMatrix [ i, 5]);
 
 						if (envCostMatrix[i, 5] < leastCost) {
 							leastCost = envCostMatrix[i, 5];

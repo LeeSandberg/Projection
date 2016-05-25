@@ -3,21 +3,18 @@ using System.Collections;
 
 public class Rotator : MonoBehaviour {
 
-	public float rotationSpeed = 45f;
-
-	public bool turn = false;
-
-
+	private Vector3 projectionTarget;
 	// Update is called once per frame
 	void Update () {
 
-		if (Input.GetKeyDown("r"))
-		{
-			turn = !turn;
+		RaycastHit hit;
+		if (Input.GetMouseButtonDown (0)) {
+			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+			int layerMask = 1 << 8;
+			if (Physics.Raycast (ray, out hit, 100f, layerMask)) {
+				projectionTarget = hit.point;
+			}
 		}
-
-		if (turn) { 
-			transform.Rotate(Vector3.up * Time.deltaTime * rotationSpeed, Space.World);
-		}
+		transform.LookAt (projectionTarget);
 	}
 }
